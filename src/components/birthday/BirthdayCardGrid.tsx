@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import BirthdayCard from "./BirthdayCard";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
@@ -20,91 +20,19 @@ interface Birthday {
 }
 
 interface BirthdayCardGridProps {
-  birthdays?: Birthday[];
+  birthdays: Birthday[];
   selectedMonth?: number | null;
-  onPageChange?: (page: number) => void;
-  currentPage?: number;
-  totalPages?: number;
-  loading?: boolean;
+  itemsPerPage?: number;
 }
 
 const BirthdayCardGrid = ({
-  birthdays = [
-    {
-      id: "1",
-      name: "Emma Johnson",
-      birthdate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        new Date().getDate(),
-      ),
-      age: 28,
-      avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma-123",
-    },
-    {
-      id: "2",
-      name: "Michael Chen",
-      birthdate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        new Date().getDate() + 5,
-      ),
-      age: 34,
-      avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael-456",
-    },
-    {
-      id: "3",
-      name: "Sophia Rodriguez",
-      birthdate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        new Date().getDate() + 12,
-      ),
-      age: 25,
-      avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sophia-789",
-    },
-    {
-      id: "4",
-      name: "James Wilson",
-      birthdate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        new Date().getDate() + 18,
-      ),
-      age: 42,
-      avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=James-101",
-    },
-    {
-      id: "5",
-      name: "Olivia Kim",
-      birthdate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth() + 1,
-        3,
-      ),
-      age: 31,
-      avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Olivia-202",
-    },
-    {
-      id: "6",
-      name: "Noah Patel",
-      birthdate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth() + 1,
-        10,
-      ),
-      age: 29,
-      avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Noah-303",
-    },
-  ],
+  birthdays,
   selectedMonth = null,
-  onPageChange = () => {},
-  currentPage = 1,
-  totalPages = 3,
-  loading = false,
+  itemsPerPage = 6,
 }: BirthdayCardGridProps) => {
   const [sortOption, setSortOption] = useState<"date" | "name">("date");
   const [showTodayOnly, setShowTodayOnly] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Check if today is someone's birthday
   const today = new Date();
@@ -112,39 +40,55 @@ const BirthdayCardGrid = ({
   const todayDate = today.getDate();
 
   // Filter birthdays based on selected month and today-only filter
-  const filteredBirthdays = birthdays.filter((birthday) => {
-    const birthdayMonth = birthday.birthdate.getMonth();
-    const birthdayDate = birthday.birthdate.getDate();
+  const filteredBirthdays = useMemo(() => {
+    return birthdays.filter((birthday) => {
+      const birthdayMonth = birthday.birthdate.getMonth();
+      const birthdayDate = birthday.birthdate.getDate();
 
-    const isToday = birthdayMonth === todayMonth && birthdayDate === todayDate;
+      const isToday = birthdayMonth === todayMonth && birthdayDate === todayDate;
 
-    if (showTodayOnly) {
-      return isToday;
-    }
+      if (showTodayOnly) {
+        return isToday;
+      }
 
-    if (selectedMonth !== null) {
-      return birthdayMonth === selectedMonth;
-    }
+      if (selectedMonth !== null) {
+        return birthdayMonth === selectedMonth;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [birthdays, selectedMonth, showTodayOnly, todayMonth, todayDate]);
 
   // Sort birthdays based on selected option
-  const sortedBirthdays = [...filteredBirthdays].sort((a, b) => {
-    if (sortOption === "date") {
-      // Sort by month and day
-      const aMonth = a.birthdate.getMonth();
-      const aDay = a.birthdate.getDate();
-      const bMonth = b.birthdate.getMonth();
-      const bDay = b.birthdate.getDate();
+  const sortedBirthdays = useMemo(() => {
+    return [...filteredBirthdays].sort((a, b) => {
+      if (sortOption === "date") {
+        // Sort by month and day
+        const aMonth = a.birthdate.getMonth();
+        const aDay = a.birthdate.getDate();
+        const bMonth = b.birthdate.getMonth();
+        const bDay = b.birthdate.getDate();
 
-      if (aMonth !== bMonth) return aMonth - bMonth;
-      return aDay - bDay;
-    } else {
-      // Sort by name
-      return a.name.localeCompare(b.name);
-    }
-  });
+        if (aMonth !== bMonth) return aMonth - bMonth;
+        return aDay - bDay;
+      } else {
+        // Sort by name
+        return a.name.localeCompare(b.name);
+      }
+    });
+  }, [filteredBirthdays, sortOption]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedBirthdays.length / itemsPerPage);
+  const paginatedBirthdays = sortedBirthdays.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedMonth, showTodayOnly, sortOption]);
 
   // Animation variants for the grid
   const containerVariants = {
@@ -170,9 +114,9 @@ const BirthdayCardGrid = ({
   };
 
   return (
-    <div className="w-full bg-background dark:bg-background/50 p-4 rounded-lg">
+    <div className="w-full bg-card dark:bg-card/50 p-4 rounded-lg">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-primary dark:text-primary-foreground mb-4 sm:mb-0">
+        <h2 className="text-2xl font-bold text-foreground dark:text-foreground mb-4 sm:mb-0">
           {selectedMonth !== null
             ? `Birthdays in ${new Date(0, selectedMonth).toLocaleString("default", { month: "long" })}`
             : showTodayOnly
@@ -186,7 +130,7 @@ const BirthdayCardGrid = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2 dark:bg-background/50"
+                className="flex items-center gap-2 bg-background hover:bg-muted dark:bg-background/50 dark:hover:bg-muted/50"
               >
                 <Filter className="h-4 w-4" />
                 <span>Filter & Sort</span>
@@ -233,11 +177,7 @@ const BirthdayCardGrid = ({
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      ) : sortedBirthdays.length === 0 ? (
+      {sortedBirthdays.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
           <div className="text-6xl mb-4">🎂</div>
           <p className="text-xl font-medium text-foreground dark:text-foreground">No birthdays found</p>
@@ -256,7 +196,7 @@ const BirthdayCardGrid = ({
           initial="hidden"
           animate="visible"
         >
-          {sortedBirthdays.map((birthday) => {
+          {paginatedBirthdays.map((birthday) => {
             const isTodayBirthday =
               birthday.birthdate.getMonth() === todayMonth &&
               birthday.birthdate.getDate() === todayDate;
@@ -286,7 +226,7 @@ const BirthdayCardGrid = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onPageChange(currentPage - 1)}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -299,7 +239,7 @@ const BirthdayCardGrid = ({
                 variant={currentPage === page ? "default" : "outline"}
                 size="sm"
                 className="w-8 h-8 p-0"
-                onClick={() => onPageChange(page)}
+                onClick={() => setCurrentPage(page)}
               >
                 {page}
               </Button>
@@ -309,7 +249,7 @@ const BirthdayCardGrid = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onPageChange(currentPage + 1)}
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
           >
             <ChevronRight className="h-4 w-4" />
