@@ -51,7 +51,7 @@ const generateConfettiPieces = (count: number): ConfettiPiece[] => {
 const ConfettiAnimation: React.FC<ConfettiAnimationProps> = ({
   isActive = true,
   duration = 7,
-  pieceCount = 150,
+  pieceCount = 200,
 }) => {
   const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
 
@@ -103,7 +103,7 @@ const ConfettiAnimation: React.FC<ConfettiAnimationProps> = ({
       ))}
 
       {/* Balloon elements */}
-      {Array.from({ length: 10 }).map((_, i) => {
+      {Array.from({ length: 15 }).map((_, i) => {
         const size = 30 + Math.random() * 40;
         const color = [
           "#FF5252",

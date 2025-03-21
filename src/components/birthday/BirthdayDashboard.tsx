@@ -7,6 +7,7 @@ import NotificationSettings from "./NotificationSettings";
 import ThemeToggle from "./ThemeToggle";
 import CountdownTimer from "./CountdownTimer";
 import ConfettiAnimation from "./ConfettiAnimation";
+import BirthdayStats from "./BirthdayStats";
 import { formatBirthdays, getUpcomingBirthdays } from "@/data/birthdays";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gift, Calendar, Settings } from "lucide-react";
@@ -17,12 +18,44 @@ import { Toaster } from "@/components/ui/toaster";
 const BirthdayDashboard = () => {
   const { theme } = useTheme();
   const { toast } = useToast();
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
+  const [selectedMonth, setSelectedMonth] = useState<number>(
+    new Date().getMonth(),
+  );
   const [showConfetti, setShowConfetti] = useState(false);
   const [birthdays, setBirthdays] = useState(formatBirthdays());
-  const [upcomingBirthday, setUpcomingBirthday] = useState(getUpcomingBirthdays(1)[0]);
+  const [upcomingBirthday, setUpcomingBirthday] = useState(
+    getUpcomingBirthdays(1)[0],
+  );
   const [showSettings, setShowSettings] = useState(false);
-  const [viewPreference, setViewPreference] = useState<"card" | "list" | "calendar">("card");
+  const [viewPreference, setViewPreference] = useState<
+    "card" | "list" | "calendar"
+  >("card");
+
+  // Check for today's birthdays and trigger confetti automatically
+  useEffect(() => {
+    const today = new Date();
+    const todayMonth = today.getMonth();
+    const todayDate = today.getDate();
+
+    const hasBirthdayToday = birthdays.some(
+      (birthday) =>
+        birthday.birthdate.getMonth() === todayMonth &&
+        birthday.birthdate.getDate() === todayDate,
+    );
+
+    if (hasBirthdayToday) {
+      setShowConfetti(true);
+      toast({
+        title: "🎉 Birthday Today!",
+        description:
+          "Someone has a birthday today! Check it out and celebrate!",
+      });
+
+      // Hide confetti after 5 seconds
+      const timer = setTimeout(() => setShowConfetti(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [birthdays, toast]);
 
   // Update upcoming birthday when selected month changes
   useEffect(() => {
@@ -49,7 +82,7 @@ const BirthdayDashboard = () => {
 
   // Filter birthdays for the selected month
   const filteredBirthdays = birthdays.filter(
-    birthday => birthday.birthdate.getMonth() === selectedMonth
+    (birthday) => birthday.birthdate.getMonth() === selectedMonth,
   );
 
   return (
@@ -57,13 +90,13 @@ const BirthdayDashboard = () => {
       <Toaster />
       <header className="border-b dark:border-border">
         <div className="container mx-auto px-4 py-4">
-          <motion.div 
+          <motion.div
             className="flex justify-between items-center"
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <motion.h1 
+            <motion.h1
               className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 dark:from-primary-foreground dark:to-purple-400"
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -109,15 +142,21 @@ const BirthdayDashboard = () => {
                 onMonthChange={setSelectedMonth}
               />
 
-              {upcomingBirthday && (
-                <div className="bg-card dark:bg-card/50 p-6 rounded-lg shadow-lg dark:shadow-none">
-                  <h2 className="text-2xl font-semibold mb-4 text-foreground dark:text-foreground">Next Birthday</h2>
-                  <CountdownTimer 
-                    nextBirthdayDate={upcomingBirthday.birthdate}
-                    nextBirthdayPerson={upcomingBirthday.name}
-                  />
-                </div>
-              )}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {upcomingBirthday && (
+                  <div className="bg-card dark:bg-card/50 p-6 rounded-lg shadow-lg dark:shadow-none">
+                    <h2 className="text-2xl font-semibold mb-4 text-foreground dark:text-foreground">
+                      Next Birthday
+                    </h2>
+                    <CountdownTimer
+                      nextBirthdayDate={upcomingBirthday.birthdate}
+                      nextBirthdayPerson={upcomingBirthday.name}
+                    />
+                  </div>
+                )}
+
+                <BirthdayStats birthdays={birthdays} />
+              </div>
 
               {viewPreference === "card" && (
                 <BirthdayCardGrid birthdays={filteredBirthdays} />
@@ -133,7 +172,9 @@ const BirthdayDashboard = () => {
                       className="bg-card dark:bg-card/50 p-4 rounded-lg shadow-md dark:shadow-none flex items-center justify-between"
                     >
                       <div>
-                        <h3 className="font-semibold text-foreground dark:text-foreground">{birthday.name}</h3>
+                        <h3 className="font-semibold text-foreground dark:text-foreground">
+                          {birthday.name}
+                        </h3>
                         <p className="text-muted-foreground">
                           {birthday.birthdate.toLocaleDateString()}
                         </p>
