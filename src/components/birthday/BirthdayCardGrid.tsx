@@ -170,9 +170,9 @@ const BirthdayCardGrid = ({
   };
 
   return (
-    <div className="w-full bg-gray-50 p-4 rounded-lg">
+    <div className="w-full bg-background dark:bg-background/50 p-4 rounded-lg">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-primary mb-4 sm:mb-0">
+        <h2 className="text-2xl font-bold text-primary dark:text-primary-foreground mb-4 sm:mb-0">
           {selectedMonth !== null
             ? `Birthdays in ${new Date(0, selectedMonth).toLocaleString("default", { month: "long" })}`
             : showTodayOnly
@@ -186,23 +186,23 @@ const BirthdayCardGrid = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 dark:bg-background/50"
               >
                 <Filter className="h-4 w-4" />
                 <span>Filter & Sort</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-56">
+            <PopoverContent className="w-80 dark:bg-background/95">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <h4 className="font-medium">Sort by</h4>
+                  <h4 className="font-medium text-foreground dark:text-foreground">Sort by</h4>
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="sort-date"
                       checked={sortOption === "date"}
                       onCheckedChange={() => setSortOption("date")}
                     />
-                    <Label htmlFor="sort-date">Date</Label>
+                    <Label htmlFor="sort-date" className="text-foreground dark:text-foreground">Date</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -210,12 +210,12 @@ const BirthdayCardGrid = ({
                       checked={sortOption === "name"}
                       onCheckedChange={() => setSortOption("name")}
                     />
-                    <Label htmlFor="sort-name">Name</Label>
+                    <Label htmlFor="sort-name" className="text-foreground dark:text-foreground">Name</Label>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="font-medium">Filter</h4>
+                  <h4 className="font-medium text-foreground dark:text-foreground">Filter</h4>
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="today-only"
@@ -224,7 +224,7 @@ const BirthdayCardGrid = ({
                         setShowTodayOnly(checked === true)
                       }
                     />
-                    <Label htmlFor="today-only">Today's birthdays only</Label>
+                    <Label htmlFor="today-only" className="text-foreground dark:text-foreground">Today's birthdays only</Label>
                   </div>
                 </div>
               </div>
@@ -238,9 +238,9 @@ const BirthdayCardGrid = ({
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
       ) : sortedBirthdays.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
           <div className="text-6xl mb-4">🎂</div>
-          <p className="text-xl font-medium">No birthdays found</p>
+          <p className="text-xl font-medium text-foreground dark:text-foreground">No birthdays found</p>
           <p className="text-sm mt-2">
             {selectedMonth !== null
               ? `There are no birthdays in ${new Date(0, selectedMonth).toLocaleString("default", { month: "long" })}`

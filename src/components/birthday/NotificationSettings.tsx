@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Bell, Calendar, Clock, Save } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTheme } from "@/components/theme-provider";
+import { useToast } from "@/components/ui/use-toast";
 
 interface NotificationSettingsProps {
   onSave?: (settings: NotificationSettings) => void;
@@ -24,6 +26,8 @@ interface NotificationSettings {
   viewPreference: "card" | "list" | "calendar";
 }
 
+const STORAGE_KEY = "birthday-notification-settings";
+
 const NotificationSettings = ({
   onSave = () => {},
   defaultSettings = {
@@ -37,13 +41,25 @@ const NotificationSettings = ({
     viewPreference: "card" as const,
   },
 }: NotificationSettingsProps) => {
-  const [settings, setSettings] =
-    useState<NotificationSettings>(defaultSettings);
+  const { toast } = useToast();
+  const { setTheme } = useTheme();
+  const [settings, setSettings] = useState<NotificationSettings>(() => {
+    const savedSettings = localStorage.getItem(STORAGE_KEY);
+    return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+  });
   const [activeTab, setActiveTab] = useState("notifications");
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  }, [settings]);
 
   const handleSave = () => {
     onSave(settings);
-    // Show success message or animation here
+    setTheme(settings.theme);
+    toast({
+      title: "Settings saved",
+      description: "Your preferences have been updated successfully.",
+    });
   };
 
   const updateSettings = (key: keyof NotificationSettings, value: any) => {
@@ -54,10 +70,10 @@ const NotificationSettings = ({
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-indigo-100 to-purple-100">
+    <Card className="w-full max-w-3xl mx-auto bg-card shadow-lg rounded-xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900">
         <CardTitle className="text-xl font-bold flex items-center">
-          <Bell className="h-5 w-5 mr-2 text-indigo-600" />
+          <Bell className="h-5 w-5 mr-2 text-indigo-600 dark:text-indigo-400" />
           Settings & Preferences
         </CardTitle>
       </CardHeader>
@@ -82,7 +98,7 @@ const NotificationSettings = ({
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-base">Enable Notifications</Label>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Receive notifications about upcoming birthdays
                   </p>
                 </div>
@@ -113,7 +129,7 @@ const NotificationSettings = ({
                       }
                       className="w-full"
                     />
-                    <div className="flex justify-between text-xs text-gray-500">
+                    <div className="flex justify-between text-xs text-muted-foreground">
                       <span>1 day</span>
                       <span>7 days</span>
                       <span>14 days</span>
@@ -254,7 +270,7 @@ const NotificationSettings = ({
         <div className="mt-8 flex justify-end">
           <Button
             onClick={handleSave}
-            className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+            className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:from-indigo-600 hover:to-purple-600"
           >
             <Save className="h-4 w-4 mr-2" />
             Save Preferences

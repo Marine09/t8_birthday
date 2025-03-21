@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { Gift, Download, Share2, Palette, Image, Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/components/ui/use-toast";
+import html2canvas from "html2canvas";
 
 interface BirthdayCardGeneratorProps {
   recipientName?: string;
@@ -121,7 +123,7 @@ const BirthdayCardGenerator = ({
               />
             </div>
 
-            <Tabs defaultValue="templates">
+            <Tabs defaultValue="templates" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="templates" className="text-xs">
                   Templates
@@ -231,7 +233,7 @@ const BirthdayCardGenerator = ({
           </div>
 
           {/* Card Preview */}
-          <div className={previewMode ? "block" : "hidden md:block"}>
+          <div className={`${previewMode ? "block" : "hidden md:block"}`}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}

@@ -2,16 +2,15 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
+import { useTheme } from "@/components/theme-provider";
 
-interface ThemeToggleProps {
-  theme?: "light" | "dark";
-  onToggle?: () => void;
-}
+const ThemeToggle = () => {
+  const { theme, setTheme } = useTheme();
 
-const ThemeToggle = ({
-  theme = "light",
-  onToggle = () => {},
-}: ThemeToggleProps) => {
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -21,7 +20,7 @@ const ThemeToggle = ({
       <Button
         variant="outline"
         size="icon"
-        onClick={onToggle}
+        onClick={toggleTheme}
         className="rounded-full w-10 h-10 bg-background border-primary/20"
       >
         <motion.div
