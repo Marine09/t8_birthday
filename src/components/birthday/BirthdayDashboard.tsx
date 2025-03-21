@@ -98,7 +98,7 @@ const BirthdayDashboard = () => {
             transition={{ duration: 0.5 }}
           >
             <motion.h1
-              className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 dark:from-primary-foreground dark:to-purple-400 text-center sm:text-left"
+              className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500 dark:from-primary-foreground dark:via-purple-400 dark:to-pink-400 text-center sm:text-left"
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300 }}
             >

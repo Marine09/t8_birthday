@@ -30,7 +30,7 @@ const ThemeToggle = () => {
           {theme === "light" ? (
             <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all text-yellow-500" />
           ) : (
-            <Moon className="h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all text-blue-500" />
+            <Moon className="h-[1.2rem] w-[1.2rem] rotate-90 scale-100 transition-all text-blue-500" />
           )}
         </motion.div>
         <span className="sr-only">Toggle theme</span>

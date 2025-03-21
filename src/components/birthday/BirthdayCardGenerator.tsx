@@ -9,6 +9,7 @@ import { Gift, Download, Share2, Palette, Image, Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import html2canvas from "html2canvas";
+import { useTheme } from "next-themes";
 
 interface BirthdayCardGeneratorProps {
   recipientName?: string;
@@ -48,6 +49,7 @@ const BirthdayCardGenerator = ({
   recipientName = "",
   onGenerate = () => { },
 }: BirthdayCardGeneratorProps) => {
+  const { theme } = useTheme();
   const [cardData, setCardData] = useState<BirthdayCardData>({
     recipientName: recipientName,
     message: "Wishing you a fantastic birthday filled with joy and laughter!",
@@ -253,19 +255,19 @@ const BirthdayCardGenerator = ({
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-pink-100 to-purple-100">
-        <CardTitle className="text-xl font-bold flex items-center">
-          <Gift className="h-5 w-5 mr-2 text-pink-500" />
+    <Card className="w-full max-w-4xl mx-auto bg-background shadow-lg rounded-xl overflow-hidden border-border">
+      <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20">
+        <CardTitle className="text-xl font-bold flex items-center text-foreground">
+          <Gift className="h-5 w-5 mr-2 text-primary" />
           Birthday Card Generator
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <CardContent className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Card Editor */}
-          <div className={`space-y-6 ${previewMode ? "hidden md:block" : ""}`}>
-            <div className="space-y-4">
-              <Label htmlFor="recipient">Recipient Name</Label>
+          <div className={`space-y-4 sm:space-y-6 ${previewMode ? "hidden lg:block" : ""}`}>
+            <div className="space-y-2 sm:space-y-4">
+              <Label htmlFor="recipient" className="text-foreground">Recipient Name</Label>
               <Input
                 id="recipient"
                 value={cardData.recipientName}
@@ -273,137 +275,148 @@ const BirthdayCardGenerator = ({
                   handleInputChange("recipientName", e.target.value)
                 }
                 placeholder="Enter recipient's name"
+                className="bg-background border-input"
               />
             </div>
 
-            <div className="space-y-4">
-              <Label htmlFor="message">Birthday Message</Label>
+            <div className="space-y-2 sm:space-y-4">
+              <Label htmlFor="message" className="text-foreground">Birthday Message</Label>
               <Textarea
                 id="message"
                 value={cardData.message}
                 onChange={(e) => handleInputChange("message", e.target.value)}
                 placeholder="Write your birthday message"
                 rows={4}
+                className="bg-background border-input"
               />
             </div>
 
             <Tabs defaultValue="templates" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="templates" className="text-xs">
-                    Templates
-                  </TabsTrigger>
-                  <TabsTrigger value="colors" className="text-xs">
-                    Colors
-                  </TabsTrigger>
-                  <TabsTrigger value="background" className="text-xs">
-                    Background
-                  </TabsTrigger>
-                </TabsList>
+              <TabsList className="grid w-full grid-cols-3 bg-muted">
+                <TabsTrigger value="templates" className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  Templates
+                </TabsTrigger>
+                <TabsTrigger value="colors" className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  Colors
+                </TabsTrigger>
+                <TabsTrigger value="background" className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  Background
+                </TabsTrigger>
+              </TabsList>
 
-                <TabsContent value="templates" className="pt-4">
-                  <div className="grid grid-cols-3 gap-3">
-                    {templates.map((template) => (
+              <TabsContent value="templates" className="pt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                  {templates.map((template) => (
+                    <motion.div
+                      key={template.id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`relative rounded-lg overflow-hidden cursor-pointer border-2 ${
+                        cardData.template === template.id 
+                          ? "border-primary" 
+                          : "border-border hover:border-primary/50"
+                      }`}
+                      onClick={() => handleInputChange("template", template.id)}
+                    >
+                      <img
+                        src={template.preview}
+                        alt={template.name}
+                        className="w-full h-20 sm:h-24 object-cover"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-all">
+                        <p className="text-white text-xs font-medium text-center px-2">
+                          {template.name}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="colors" className="pt-4">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <Palette className="h-5 w-5 text-muted-foreground" />
+                    <Label className="text-foreground">Select Color Scheme</Label>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                    {colorSchemes.map((scheme) => (
                       <motion.div
-                        key={template.id}
+                        key={scheme.id}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`relative rounded-lg overflow-hidden cursor-pointer border-2 ${cardData.template === template.id ? "border-pink-500" : "border-transparent"}`}
-                        onClick={() => handleInputChange("template", template.id)}
+                        className={`h-12 rounded-md cursor-pointer border-2 ${
+                          cardData.color === scheme.color 
+                            ? "border-foreground" 
+                            : "border-border hover:border-primary/50"
+                        }`}
+                        style={{ backgroundColor: scheme.color }}
+                        onClick={() => handleInputChange("color", scheme.color)}
                       >
-                        <img
-                          src={template.preview}
-                          alt={template.name}
-                          className="w-full h-24 object-cover"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 hover:bg-opacity-40 transition-all">
-                          <p className="text-white text-xs font-medium text-center px-2">
-                            {template.name}
+                        <div className="h-full flex items-end justify-center pb-1">
+                          <p className="text-white text-xs font-medium text-center">
+                            {scheme.name}
                           </p>
                         </div>
                       </motion.div>
                     ))}
                   </div>
-                </TabsContent>
-
-                <TabsContent value="colors" className="pt-4">
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <Palette className="h-5 w-5 text-gray-500" />
-                      <Label>Select Color Scheme</Label>
-                    </div>
-                    <div className="grid grid-cols-4 gap-3">
-                      {colorSchemes.map((scheme) => (
-                        <motion.div
-                          key={scheme.id}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className={`h-12 rounded-md cursor-pointer border-2 ${cardData.color === scheme.color ? "border-gray-800" : "border-transparent"}`}
-                          style={{ backgroundColor: scheme.color }}
-                          onClick={() => handleInputChange("color", scheme.color)}
-                        >
-                          <div className="h-full flex items-end justify-center pb-1">
-                            <p className="text-white text-xs font-medium text-center">
-                              {scheme.name}
-                            </p>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                    <div className="flex items-center space-x-3 mt-4">
-                      <Label htmlFor="custom-color">Custom Color:</Label>
-                      <Input
-                        id="custom-color"
-                        type="color"
-                        value={cardData.color}
-                        onChange={(e) =>
-                          handleInputChange("color", e.target.value)
-                        }
-                        className="w-16 h-8 p-0"
-                      />
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="background" className="pt-4">
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <Image className="h-5 w-5 text-gray-500" />
-                      <Label>Background Image URL</Label>
-                    </div>
+                  <div className="flex items-center space-x-3 mt-4">
+                    <Label htmlFor="custom-color" className="text-foreground">Custom Color:</Label>
                     <Input
-                      value={cardData.backgroundImage || ""}
+                      id="custom-color"
+                      type="color"
+                      value={cardData.color}
                       onChange={(e) =>
-                        handleInputChange("backgroundImage", e.target.value)
+                        handleInputChange("color", e.target.value)
                       }
-                      placeholder="Enter image URL"
+                      className="w-16 h-8 p-0 bg-background border-input"
                     />
-                    <p className="text-xs text-gray-500">
-                      Enter a URL for a custom background image, or leave empty
-                      for a solid color background.
-                    </p>
                   </div>
-                </TabsContent>
-              </Tabs>
+                </div>
+              </TabsContent>
 
-              <div className="pt-4">
-                <Button
-                  onClick={handleGenerate}
-                  className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white"
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Generate Birthday Card
-                </Button>
-              </div>
+              <TabsContent value="background" className="pt-4">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <Image className="h-5 w-5 text-muted-foreground" />
+                    <Label className="text-foreground">Background Image URL</Label>
+                  </div>
+                  <Input
+                    value={cardData.backgroundImage || ""}
+                    onChange={(e) =>
+                      handleInputChange("backgroundImage", e.target.value)
+                    }
+                    placeholder="Enter image URL"
+                    className="bg-background border-input"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter a URL for a custom background image, or leave empty
+                    for a solid color background.
+                  </p>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <div className="pt-4">
+              <Button
+                onClick={handleGenerate}
+                className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:opacity-90 transition-opacity"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Generate Birthday Card
+              </Button>
+            </div>
           </div>
 
           {/* Card Preview */}
-          <div className={previewMode ? "block" : "hidden md:block"}>
-            <div className={`${previewMode ? "block" : "hidden md:block"}`}>
+          <div className={`${previewMode ? "block" : "hidden lg:block"}`}>
+            <div className={`${previewMode ? "block" : "hidden lg:block"}`}>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="relative h-full min-h-[400px] rounded-xl overflow-hidden shadow-lg card-preview"
+                className="relative h-full min-h-[300px] sm:min-h-[400px] rounded-xl overflow-hidden shadow-lg card-preview"
                 style={{
                   backgroundColor: cardData.color,
                   backgroundImage: cardData.backgroundImage
@@ -412,11 +425,14 @@ const BirthdayCardGenerator = ({
                   ...templates.find(t => t.id === cardData.template)?.style
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex flex-col justify-between p-6">
-                  <div className="text-center mt-8">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex flex-col justify-between p-4 sm:p-6">
+                  <div className="text-center mt-4 sm:mt-8">
                     <motion.h2
                       className="text-white font-bold mb-2"
-                      style={templates.find(t => t.id === cardData.template)?.textStyle}
+                      style={{
+                        ...templates.find(t => t.id === cardData.template)?.textStyle,
+                        fontSize: 'clamp(1.5rem, 4vw, 2.5rem)'
+                      }}
                       initial={{ y: -20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.2, duration: 0.5 }}
@@ -425,7 +441,7 @@ const BirthdayCardGenerator = ({
                     </motion.h2>
                     {cardData.recipientName && (
                       <motion.h3
-                        className="text-white text-xl"
+                        className="text-white text-lg sm:text-xl"
                         initial={{ y: -20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
@@ -436,12 +452,12 @@ const BirthdayCardGenerator = ({
                   </div>
 
                   <motion.div
-                    className="bg-white/90 p-4 rounded-lg mt-auto"
+                    className="bg-background/90 dark:bg-background/80 p-3 sm:p-4 rounded-lg mt-auto"
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.6, duration: 0.5 }}
                   >
-                    <p className="text-gray-800 text-center">
+                    <p className="text-foreground text-center text-sm sm:text-base">
                       {cardData.message}
                     </p>
                   </motion.div>
@@ -449,7 +465,7 @@ const BirthdayCardGenerator = ({
               </motion.div>
 
               {previewMode && (
-                <div className="flex justify-center space-x-3 mt-4">
+                <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-3 mt-4">
                   <Button
                     variant="outline"
                     onClick={() => setPreviewMode(false)}
@@ -468,7 +484,7 @@ const BirthdayCardGenerator = ({
                   <Button
                     variant="default"
                     onClick={handleDownload}
-                    className="flex-1 bg-pink-500 hover:bg-pink-600"
+                    className="flex-1 bg-primary hover:bg-primary/90"
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Download
